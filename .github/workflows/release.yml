@@ -1,4 +1,4 @@
-name: Draft release
+name: Release assets
 
 on:
   workflow_dispatch:
@@ -7,9 +7,23 @@ on:
         description: 'Existing release tag, matching manifest.json (for example 1.0.0)'
         required: true
         type: string
+      mode:
+        description: 'Create an attested draft, or attest matching assets of an existing release'
+        required: true
+        default: draft
+        type: choice
+        options:
+          - draft
+          - attest-existing
+
+concurrency:
+  group: release-assets-${{ inputs.tag }}
+  cancel-in-progress: false
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   release:
@@ -21,8 +35,16 @@ jobs:
         run: '[[ "$RELEASE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]'
       - uses: actions/checkout@v7
         with:
-          ref: refs/tags/${{ inputs.tag }}
+          # Build the workflow's source commit so provenance identifies it correctly.
+          ref: ${{ github.sha }}
           persist-credentials: false
+      - name: Require the draft tag to match the source commit
+        if: inputs.mode == 'draft'
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          git fetch --no-tags origin "refs/tags/$RELEASE_TAG"
+          test "$(git rev-parse 'FETCH_HEAD^{commit}')" = "$GITHUB_SHA"
       - uses: actions/setup-node@v7
         with:
           node-version: '22'
@@ -33,7 +55,28 @@ jobs:
         env:
           RELEASE_TAG: ${{ inputs.tag }}
         run: node --input-type=module -e "import fs from 'node:fs'; import assert from 'node:assert/strict'; assert.equal(JSON.parse(fs.readFileSync('manifest.json', 'utf8')).version, process.env.RELEASE_TAG);"
+      - name: Compare rebuilt files with published assets
+        if: inputs.mode == 'attest-existing'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          gh release view "$RELEASE_TAG" --json isDraft,isPrerelease,tagName > "$RUNNER_TEMP/release.json"
+          jq -e --arg tag "$RELEASE_TAG" '.tagName == $tag and .isDraft == false and .isPrerelease == false' "$RUNNER_TEMP/release.json"
+          gh release download "$RELEASE_TAG" --dir "$RUNNER_TEMP/release-to-verify" --pattern main.js --pattern manifest.json --pattern styles.css
+          for asset in main.js manifest.json styles.css; do
+            cmp -- "$asset" "$RUNNER_TEMP/release-to-verify/$asset"
+          done
+      - name: Attest rebuilt installation assets
+        uses: actions/attest@v4
+        with:
+          subject-path: |
+            main.js
+            manifest.json
+            styles.css
       - name: Create draft with installation assets
+        if: inputs.mode == 'draft'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}

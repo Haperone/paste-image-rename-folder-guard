@@ -29,11 +29,30 @@ Attach **individual files** to the GitHub release:
 
 A ZIP may be an additional convenience download, but does not replace those assets. The tag must match `manifest.json.version`. The manifest at the default branch's HEAD must describe the submitted version.
 
-## Optional GitHub Actions draft release
+## GitHub Actions releases and attestations
 
-After an approved commit and push, create/push the matching version tag with the owner's approval. Run **Draft release** from the Actions tab and enter that tag. The workflow checks out the existing tag, runs the checks, verifies the tag against the manifest and creates a **draft** release with the three assets. It does not create commits or push tags, and does not publish the draft automatically.
+After an approved commit and push, create/push the matching version tag with the owner's approval. Run **Release assets** from the Actions tab with mode `draft`, selecting the release tag as the workflow ref and entering the same tag in the input. The selected ref must contain this workflow. The workflow verifies that the tag points to its source commit, runs the checks and builds the assets, verifies the manifest version, creates GitHub build-provenance attestations, then creates a **draft** release with the three assets. It does not create commits or push tags, and does not publish the draft automatically.
 
 Review the draft and publish it when approved.
+
+### Attest an existing release
+
+For a release uploaded manually, such as `1.0.0`, run **Release assets** with mode `attest-existing` and the existing version as the tag input. Select a branch that contains this workflow and can reproduce that release's files.
+
+The workflow builds from its own source commit, downloads the three published assets to a separate temporary directory, and compares them byte for byte. Only matching rebuilt files are attested. A mismatch stops the workflow; it never replaces published files or moves the release tag. The attestation identifies the source commit of this rebuild, which may be newer than the original tag.
+
+The workflow needs `id-token: write` and `attestations: write` to generate and store provenance; its existing `contents: write` permission is used for draft releases. These permissions belong to the release workflow, not pull-request checks.
+
+Verify the published files after the workflow succeeds:
+
+```sh
+gh release download 1.0.0 --repo Haperone/paste-image-rename-folder-guard --dir release-check --pattern main.js --pattern manifest.json --pattern styles.css
+gh attestation verify release-check/main.js --repo Haperone/paste-image-rename-folder-guard
+gh attestation verify release-check/manifest.json --repo Haperone/paste-image-rename-folder-guard
+gh attestation verify release-check/styles.css --repo Haperone/paste-image-rename-folder-guard
+```
+
+Then request another release check in the Obsidian Community directory. See [GitHub's attestation documentation](https://docs.github.com/en/actions/how-tos/secure-your-work/use-artifact-attestations/use-artifact-attestations).
 
 ## Submit
 
