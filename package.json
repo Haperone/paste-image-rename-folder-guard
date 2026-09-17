@@ -1,0 +1,30 @@
+{
+  "name": "paste-image-rename-folder-guard",
+  "version": "1.0.0",
+  "description": "Exclude vault folders from automatic attachment renaming by Paste image rename.",
+  "private": true,
+  "license": "MIT",
+  "author": "haperone",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "dev": "node esbuild.config.mjs --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --max-warnings=0",
+    "test": "node scripts/test.mjs",
+    "build": "npm run typecheck && node esbuild.config.mjs",
+    "validate": "node scripts/validate.mjs",
+    "check": "npm run lint && npm test && npm run build && npm run validate",
+    "package": "npm run check && node scripts/package.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.3",
+    "esbuild": "0.28.2",
+    "eslint": "10.10.0",
+    "eslint-plugin-obsidianmd": "0.4.2",
+    "obsidian": "1.13.1",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.70.0"
+  }
+}

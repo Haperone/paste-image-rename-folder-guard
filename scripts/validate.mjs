@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import { readFile, stat } from 'node:fs/promises';
+
+const json = async path => JSON.parse(await readFile(path, 'utf8'));
+const manifest = await json('manifest.json');
+const pkg = await json('package.json');
+const versions = await json('versions.json');
+assert.match(manifest.id, /^[a-z0-9]+(?:-[a-z0-9]+)*$/);
+assert(!manifest.id.includes('obsidian') && !manifest.id.endsWith('plugin'));
+assert(!/obsidian|^obsi|dian$|plugin$/i.test(manifest.name));
+assert(manifest.description.length <= 250 && manifest.description.endsWith('.'));
+assert(!/obsidian|this plugin/i.test(manifest.description));
+assert.match(manifest.version, /^\d+\.\d+\.\d+$/);
+assert.match(manifest.minAppVersion, /^\d+\.\d+\.\d+$/);
+assert.equal(pkg.version, manifest.version);
+assert.equal(versions[manifest.version], manifest.minAppVersion);
+assert.equal(pkg.author, manifest.author);
+assert(manifest.author && !/local patch|your name/i.test(manifest.author));
+assert.equal(typeof manifest.isDesktopOnly, 'boolean');
+assert.equal(pkg.license, 'MIT');
+for (const path of ['main.js', 'styles.css', 'README.md', 'LICENSE']) assert((await stat(path)).size > 0);
+const bundle = await readFile('main.js', 'utf8');
+const imports = [...bundle.matchAll(/require\(["']([^"']+)["']\)/g)].map(match => match[1]);
+assert.deepEqual([...new Set(imports)], ['obsidian'], 'The runtime bundle must depend only on Obsidian.');
+assert(!/eval\(|\bfetch\(|\bXMLHttpRequest\b|\bhttps?:\/\//.test(bundle), 'No dynamic execution or network code in the runtime.');
+assert((await readFile('LICENSE', 'utf8')).includes(`Copyright (c) 2026 ${manifest.author}`));
+console.log(`Validated ${manifest.id} ${manifest.version}: metadata, assets, license and runtime imports.`);

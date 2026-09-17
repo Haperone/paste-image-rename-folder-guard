@@ -1,0 +1,26 @@
+.pir-folder-guard.pir-folder-guard-folders {
+  display: block;
+}
+
+.pir-folder-guard.pir-folder-guard-folders .setting-item-control {
+  margin-top: var(--size-4-3);
+}
+
+.pir-folder-guard textarea {
+  width: 100%;
+  min-height: 44px;
+  resize: vertical;
+  font-family: var(--font-monospace);
+}
+
+.pir-folder-guard textarea:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
+}
+
+.pir-folder-guard .pir-folder-guard-feedback {
+  color: var(--text-muted);
+  font-size: var(--font-ui-small);
+  margin-bottom: var(--size-4-4);
+  overflow-wrap: anywhere;
+}
