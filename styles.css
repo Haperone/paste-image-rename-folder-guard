@@ -16,7 +16,11 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--size-4-2);
-  margin-bottom: var(--size-4-2);
+  margin-top: var(--size-4-2);
+}
+
+.pir-folder-guard .pir-folder-guard-chips:empty {
+  display: none;
 }
 
 .pir-folder-guard button.pir-folder-guard-chip {
@@ -28,9 +32,22 @@
   height: auto;
   padding: var(--size-4-2) var(--size-4-3);
   border-radius: 100px;
+  border: 1px solid var(--background-modifier-border);
   background: var(--background-modifier-hover);
+  color: var(--text-normal);
+  cursor: pointer;
   box-shadow: none;
   text-align: start;
+}
+
+.pir-folder-guard button.pir-folder-guard-chip:hover {
+  background: transparent;
+  border-color: var(--text-error);
+  color: var(--text-error);
+}
+
+.pir-folder-guard button.pir-folder-guard-chip:hover .pir-folder-guard-chip-icon {
+  color: inherit;
 }
 
 .pir-folder-guard .pir-folder-guard-chip-label {

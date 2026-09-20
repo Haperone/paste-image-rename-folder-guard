@@ -40,13 +40,13 @@ export class FolderPicker extends Component {
     setting.settingEl.addClass('pir-folder-guard', 'pir-folder-guard-folders');
     const root = setting.controlEl.createDiv({ cls: 'pir-folder-guard-picker' });
     this.register(() => root.remove());
-    const chips = root.createDiv({ cls: 'pir-folder-guard-chips', attr: { role: 'group', 'aria-label': 'Excluded folders' } });
     const entry = root.createDiv({ cls: 'pir-folder-guard-entry' });
     const input = entry.createEl('input', {
       type: 'text', placeholder: 'Search vault folders…',
       attr: { 'aria-label': 'Folder to exclude', spellcheck: 'false' }
     });
     const add = entry.createEl('button', { text: 'Add folder', attr: { type: 'button' } });
+    const chips = root.createDiv({ cls: 'pir-folder-guard-chips', attr: { role: 'group', 'aria-label': 'Excluded folders' } });
     const feedback = root.createDiv({ cls: 'pir-folder-guard-feedback', attr: { role: 'status' } });
     let chipEvents = this.addChild(new Component());
 
