@@ -1,8 +1,8 @@
 # Paste Image Rename Folder Guard
 
-Keep imported attachments in selected folders out of **Paste image rename**'s automatic rename flow. Useful when an importer, such as Telegram Sync, needs attachment filenames to stay stable while it writes links into notes.
+**An add-on for [Paste image rename](https://github.com/reorx/obsidian-paste-image-rename) that adds folder exclusions.** Choose the folders where Paste image rename must not automatically rename attachments or show rename prompts. It continues working as usual everywhere else.
 
-**Requires [Paste image rename](https://github.com/reorx/obsidian-paste-image-rename) to be installed and enabled separately.** Folder Guard does not rename, move, delete or rewrite vault files.
+**Paste image rename must be installed and enabled separately.** Folder Guard needs it to work.
 
 [Инструкция на русском](docs/README.ru.md)
 
@@ -10,17 +10,14 @@ Keep imported attachments in selected folders out of **Paste image rename**'s au
 
 1. Enable Paste image rename and Folder Guard.
 2. Open **Settings → Paste Image Rename Folder Guard**.
-3. Enter the folders to exclude, one per line:
-
-   ```text
-   Telegram/
-   Imported/Images/
-   Backups/
-   ```
-
+3. In **Excluded folders**, start typing a folder name and select it from the suggestions. It appears as a chip.
 4. Confirm that **Connection status** says the guard is connected before starting an import.
 
-No folders are excluded by default. Add the folders you want to protect. Changes apply immediately and are saved automatically. Clearing the list disables all exclusions without disabling either plugin.
+Click a chip to remove its exclusion. To exclude a folder that does not exist yet, enter its full path relative to the vault and click **Add folder**.
+
+**No folders are excluded by default.** Changes apply immediately and are saved automatically. Removing all chips clears all exclusions.
+
+For example, exclude `Telegram` to keep the original names of attachments created by Telegram Sync, while Paste image rename continues handling attachments in other folders.
 
 ## Matching rules
 
@@ -28,13 +25,13 @@ No folders are excluded by default. Add the folders you want to protect. Changes
 - Each rule includes all subfolders. `Telegram/` protects `Telegram/photo.png` and `Telegram/Media/photo.png`, but not `Telegram-old/photo.png` or `Notes/Telegram/photo.png`.
 - Matching is case-sensitive: use the exact capitalization shown in your vault.
 - Leading/trailing slashes and Windows backslashes are normalized. Duplicate rules are ignored.
-- Newlines, commas and semicolons separate entries. Folder names containing commas or semicolons cannot be represented.
+- Each chip represents one folder. Folder names can contain commas and semicolons.
 - Absolute drive paths, URLs, root-only rules, and `.` or `..` path segments are rejected and shown in settings. No wildcards or regular expressions are supported.
 - Rules may refer to folders that do not exist yet.
 
 ## Scope and compatibility
 
-For excluded attachments, the guard skips both automatic renaming and the automatic rename confirmation dialog. It leaves all other files to Paste image rename unchanged, including its naming templates and extension filters.
+Folder Guard only controls Paste image rename's automatic processing. It does not rename, move, delete or rewrite files itself, and it does not change the original plugin's settings.
 
 **Manual batch rename commands are outside the guard's scope.** Existing files are not scanned or reverted, and operations already started before the guard connected are not cancelled. Other plugins' file operations are not blocked.
 
@@ -47,7 +44,7 @@ Requires Obsidian **1.8.7** or later. On 1.13 and later, you can also find the e
 ## Install manually
 
 1. Install and enable **Paste image rename** from Community plugins.
-2. Download `main.js`, `manifest.json`, and `styles.css` from a release.
+2. Download `main.js`, `manifest.json`, and `styles.css` from the [latest release](https://github.com/Haperone/paste-image-rename-folder-guard/releases/latest).
 3. In your vault's configuration directory (normally `.obsidian`), create `plugins/paste-image-rename-folder-guard/` and put those three files inside.
 4. Reload Obsidian, then enable **Paste Image Rename Folder Guard** in Community plugins.
 

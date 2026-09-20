@@ -6,10 +6,12 @@ export interface FolderRules {
 }
 
 /** Paths are vault-relative and case-sensitive. Never treat a blank rule as root. */
-export function parseFolders(input: string): FolderRules {
+export function parseFolders(input: string | readonly string[]): FolderRules {
   const folders = new Set<string>();
   const invalid: string[] = [];
-  for (const entry of input.split(/[\r\n,;]+/)) {
+  // Keep legacy text settings readable; array entries preserve commas and semicolons.
+  const entries = typeof input === 'string' ? input.split(/[\r\n,;]+/) : input;
+  for (const entry of entries) {
     const value = entry.trim().replace(/\\/g, '/');
     if (!value) continue;
     if (/^[a-z]:/i.test(value) || value.includes('://') || value.split('/').some(part => part === '.' || part === '..')) {

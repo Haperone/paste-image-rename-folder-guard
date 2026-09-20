@@ -6,21 +6,71 @@
   margin-top: var(--size-4-3);
 }
 
-.pir-folder-guard textarea {
+.pir-folder-guard .pir-folder-guard-picker {
   width: 100%;
-  min-height: 44px;
-  resize: vertical;
-  font-family: var(--font-monospace);
+  min-width: 0;
+  text-align: start;
 }
 
-.pir-folder-guard textarea:focus-visible {
+.pir-folder-guard .pir-folder-guard-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--size-4-2);
+  margin-bottom: var(--size-4-2);
+}
+
+.pir-folder-guard button.pir-folder-guard-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--size-4-2);
+  max-width: 100%;
+  min-height: 44px;
+  height: auto;
+  padding: var(--size-4-2) var(--size-4-3);
+  border-radius: 100px;
+  background: var(--background-modifier-hover);
+  box-shadow: none;
+  text-align: start;
+}
+
+.pir-folder-guard .pir-folder-guard-chip-label {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.pir-folder-guard .pir-folder-guard-chip-icon {
+  display: flex;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  --icon-size: 14px;
+}
+
+.pir-folder-guard .pir-folder-guard-entry {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--size-4-2);
+}
+
+.pir-folder-guard .pir-folder-guard-entry input {
+  flex: 1 1 180px;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+}
+
+.pir-folder-guard .pir-folder-guard-entry button {
+  min-height: 44px;
+}
+
+.pir-folder-guard :is(input, button):focus-visible {
   outline: 2px solid var(--interactive-accent);
   outline-offset: 2px;
 }
 
 .pir-folder-guard .pir-folder-guard-feedback {
+  margin-top: var(--size-4-2);
   color: var(--text-muted);
   font-size: var(--font-ui-small);
-  margin-bottom: var(--size-4-4);
   overflow-wrap: anywhere;
 }

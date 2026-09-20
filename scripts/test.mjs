@@ -10,6 +10,6 @@ await build({
   alias: { obsidian: './tests/obsidian-mock.mjs' },
   logLevel: 'silent'
 });
-const result = spawnSync(process.execPath, ['--test', 'tests/guard.test.mjs'], { stdio: 'inherit' });
+const result = spawnSync(process.execPath, ['--test', 'tests/guard.test.mjs', 'tests/picker.test.mjs'], { stdio: 'inherit' });
 if (result.error) throw result.error;
 process.exitCode = result.status ?? 1;
