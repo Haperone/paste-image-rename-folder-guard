@@ -22,4 +22,4 @@ The guard wraps `startRenameProcess` on the loaded Paste image rename instance a
 
 Connection is checked at load, when the workspace becomes ready and once per second afterward. Unload restores the original handler if still owned; a wrapper retained by another extension becomes a pass-through.
 
-Settings retain the original helper's `excludedFolders` format. New installations and missing or invalid settings use an empty exclusion list. Previously saved exclusions are preserved.
+Settings read both the original helper's `excludedFolders` string and the folder picker's string array. The first selection change saves an array, preserving literal commas and semicolons in folder names. New installations and missing or invalid settings use an empty exclusion list. Previously saved exclusions are preserved.

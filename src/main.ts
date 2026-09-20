@@ -1,5 +1,6 @@
 import { App, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import { isExcluded, parseFolders, type FolderRules } from './folders';
+import { FolderPicker } from './folder-picker';
 import { findTarget, RenameGuard, type GuardStatus } from './integration';
 import { DEFAULT_SETTINGS, readSettings, type GuardSettings } from './settings';
 
@@ -31,7 +32,9 @@ export default class FolderGuardPlugin extends Plugin {
     // Loading data may finish after the user has disabled the plugin.
     if (this.stopped) return;
     this.rules = parseFolders(this.settings.excludedFolders);
-    this.addSettingTab(new FolderGuardSettingTab(this.app, this));
+    const settingsTab = new FolderGuardSettingTab(this.app, this);
+    this.addSettingTab(settingsTab);
+    this.register(() => settingsTab.hide());
     this.refresh();
     this.app.workspace.onLayoutReady(() => { if (!this.stopped) this.refresh(); });
     // There is no public plugin-enabled event. Poll only a single registry entry.
@@ -47,11 +50,11 @@ export default class FolderGuardPlugin extends Plugin {
     this.onStatusChange?.();
   }
 
-  async updateFolders(value: string): Promise<void> {
-    this.settings = { excludedFolders: value };
+  async updateFolders(value: string | string[]): Promise<void> {
+    this.settings = readSettings({ excludedFolders: value });
     this.rules = parseFolders(value);
-    const snapshot = { ...this.settings };
-    // Textarea changes can overlap; persist snapshots in the same order as edits.
+    const snapshot = readSettings(this.settings);
+    // Rapid additions/removals can overlap; save snapshots in the order of edits.
     this.saveQueue = this.saveQueue.then(async () => {
       try {
         await this.saveData(snapshot);
@@ -71,6 +74,8 @@ export default class FolderGuardPlugin extends Plugin {
 }
 
 class FolderGuardSettingTab extends PluginSettingTab {
+  private folderPicker: FolderPicker | null = null;
+
   constructor(app: App, private readonly guardPlugin: FolderGuardPlugin) {
     super(app, guardPlugin);
   }
@@ -81,7 +86,7 @@ class FolderGuardSettingTab extends PluginSettingTab {
     return [
       {
         name: 'Excluded folders',
-        desc: 'Enter paths from the vault root, one per line. Subfolders are included. Matching is case-sensitive; an empty list excludes nothing. Commas and semicolons also separate entries.',
+        desc: 'Choose folders where Paste image rename must skip automatic renaming and rename prompts. Subfolders are included. Click a chip to remove an exclusion.',
         render: (setting: Setting) => this.renderFolders(setting)
       },
       { name: 'Connection status', render: (setting: Setting) => this.renderStatus(setting) },
@@ -94,6 +99,7 @@ class FolderGuardSettingTab extends PluginSettingTab {
 
   // Compatibility fallback: Obsidian 1.13+ renders the definitions instead.
   override display(): void {
+    this.hide();
     this.containerEl.empty();
     for (const definition of this.getSettingDefinitions()) {
       const setting = new Setting(this.containerEl).setName(definition.name);
@@ -102,27 +108,17 @@ class FolderGuardSettingTab extends PluginSettingTab {
     }
   }
 
-  private renderFolders(setting: Setting): void {
-    setting.settingEl.addClass('pir-folder-guard', 'pir-folder-guard-folders');
-    const feedback = setting.settingEl.createDiv({ cls: 'pir-folder-guard-feedback', attr: { role: 'status' } });
-    const updateRules = () => {
-      const { folders: paths, invalid } = this.guardPlugin.rules;
-      const summary = paths.length ? `${paths.length} folder exclusion${paths.length === 1 ? '' : 's'} active.` : 'No folders excluded.';
-      feedback.setText(invalid.length ? `${summary} Ignored invalid paths: ${invalid.join(', ')}. Use vault-relative folders, without . or .. segments.` : summary);
+  private renderFolders(setting: Setting): () => void {
+    this.folderPicker?.unload();
+    const picker = new FolderPicker(this.app, setting,
+      () => this.guardPlugin.rules,
+      paths => { void this.guardPlugin.updateFolders(paths); });
+    this.folderPicker = picker;
+    picker.load();
+    return () => {
+      picker.unload();
+      if (this.folderPicker === picker) this.folderPicker = null;
     };
-    setting.addTextArea(text => {
-      text.setPlaceholder('Enter folder paths')
-        .setValue(this.guardPlugin.settings.excludedFolders)
-        .onChange(async value => {
-          const saved = this.guardPlugin.updateFolders(value);
-          updateRules();
-          await saved;
-        });
-      text.inputEl.rows = 6;
-      text.inputEl.setAttribute('aria-label', 'Excluded folders');
-      text.inputEl.setAttribute('spellcheck', 'false');
-    });
-    updateRules();
   }
 
   private renderStatus(status: Setting): () => void {
@@ -140,6 +136,8 @@ class FolderGuardSettingTab extends PluginSettingTab {
   }
 
   override hide(): void {
+    this.folderPicker?.unload();
+    this.folderPicker = null;
     this.guardPlugin.onStatusChange = null;
   }
 }

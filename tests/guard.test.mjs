@@ -40,6 +40,18 @@ test('dependency discovery tolerates missing and malformed private API', () => {
   assert.equal(findTarget({ plugins: { plugins: { [TARGET_PLUGIN_ID]: target } } }), target);
 });
 
+test('folder lists preserve literal separators, reject malformed data and copy saved arrays', () => {
+  const folders = ['Photos, originals', 'Archive;2026', 'Архив/Фото'];
+  const settings = readSettings({ excludedFolders: folders });
+  folders.push('Later');
+  assert.deepEqual(settings.excludedFolders, ['Photos, originals', 'Archive;2026', 'Архив/Фото']);
+  assert.deepEqual(parseFolders(settings.excludedFolders), { folders: settings.excludedFolders, invalid: [] });
+  assert(isExcluded('Photos, originals/a.png', parseFolders(settings.excludedFolders).folders));
+  assert(!isExcluded('Photos/a.png', parseFolders(settings.excludedFolders).folders));
+  assert.deepEqual(readSettings({ excludedFolders: ['Valid', 1] }), DEFAULT_SETTINGS);
+  assert.deepEqual(readSettings({ excludedFolders: [] }), { excludedFolders: [] });
+});
+
 test('protected attachments skip prompts and automatic renames', async () => {
   let calls = 0;
   const target = { startRenameProcess() { calls++; } };
@@ -237,4 +249,23 @@ test('read and write failures are reported, and later saves still work', async (
     assert(Notice.messages.some(message => message.includes('could not load')));
     assert(Notice.messages.some(message => message.includes('could not be saved')));
   } finally { console.error = originalError; plugin.unload(); }
+});
+
+test('queued folder lists are snapshots, and empty selections survive a restart', async () => {
+  const { plugin } = fixture();
+  await plugin.onload();
+  const folders = ['Photos, originals'];
+  const saving = plugin.updateFolders(folders);
+  folders.push('Unselected');
+  plugin.settings.excludedFolders.push('Unselected in saved state');
+  await saving;
+  assert.deepEqual(plugin.persisted, [{ excludedFolders: ['Photos, originals'] }]);
+  assert.deepEqual(plugin.rules.folders, ['Photos, originals']);
+  await plugin.updateFolders([]);
+  const { plugin: restarted } = fixture();
+  restarted.data = plugin.persisted.at(-1);
+  await restarted.onload();
+  assert.deepEqual(restarted.rules.folders, []);
+  plugin.unload();
+  restarted.unload();
 });

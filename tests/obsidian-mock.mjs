@@ -26,3 +26,33 @@ export class PluginSettingTab {
 
 export class App {}
 export class Setting {}
+
+export class Component {
+  cleanups = [];
+  children = [];
+  loaded = false;
+  onload() {}
+  load() { if (!this.loaded) { this.loaded = true; this.onload(); this.children.forEach(child => child.load()); } }
+  unload() {
+    if (!this.loaded) return;
+    this.loaded = false;
+    this.children.forEach(child => child.unload());
+    this.cleanups.splice(0).forEach(cleanup => cleanup());
+  }
+  register(cleanup) { this.cleanups.push(cleanup); }
+  registerDomEvent(el, type, listener) {
+    el.addEventListener(type, listener);
+    this.register(() => el.removeEventListener(type, listener));
+  }
+  addChild(child) { this.children.push(child); if (this.loaded) child.load(); return child; }
+  removeChild(child) { child.unload(); this.children = this.children.filter(item => item !== child); return child; }
+}
+
+export class AbstractInputSuggest {
+  static instances = [];
+  closed = false;
+  constructor(app, input) { this.app = app; this.input = input; AbstractInputSuggest.instances.push(this); }
+  close() { this.closed = true; }
+}
+
+export function setIcon(el, icon) { el.icon = icon; }
