@@ -1,4 +1,4 @@
-import { AbstractInputSuggest, App, Component, setIcon, Setting } from 'obsidian';
+import { AbstractInputSuggest, App, Component, Platform, setIcon, Setting } from 'obsidian';
 import { parseFolders, type FolderRules } from './folders';
 
 class FolderSuggest extends AbstractInputSuggest<string> {
@@ -18,6 +18,7 @@ class FolderSuggest extends AbstractInputSuggest<string> {
   }
 
   override renderSuggestion(path: string, el: HTMLElement): void {
+    el.addClass('pir-folder-guard-folder-suggestion');
     el.setText(path);
   }
 
@@ -43,12 +44,22 @@ export class FolderPicker extends Component {
     const entry = root.createDiv({ cls: 'pir-folder-guard-entry' });
     const input = entry.createEl('input', {
       type: 'text', placeholder: 'Search vault folders…',
-      attr: { 'aria-label': 'Folder to exclude', spellcheck: 'false' }
+      attr: { 'aria-label': 'Folder to exclude', spellcheck: 'false', autocapitalize: 'none', autocorrect: 'off', autocomplete: 'off' }
     });
     const add = entry.createEl('button', { text: 'Add folder', attr: { type: 'button' } });
     const chips = root.createDiv({ cls: 'pir-folder-guard-chips', attr: { role: 'group', 'aria-label': 'Excluded folders' } });
     const feedback = root.createDiv({ cls: 'pir-folder-guard-feedback', attr: { role: 'status' } });
     let chipEvents = this.addChild(new Component());
+
+    const focusAfterChange = () => {
+      if (Platform.isMobile) {
+        // Keep a reachable focus target without reopening the software keyboard.
+        input.blur();
+        add.focus({ preventScroll: true });
+      } else {
+        input.focus({ preventScroll: true });
+      }
+    };
 
     const renderChips = () => {
       this.removeChild(chipEvents);
@@ -64,7 +75,7 @@ export class FolderPicker extends Component {
         chipEvents.registerDomEvent(chip, 'click', () => {
           this.onChange(this.rules().folders.filter(folder => folder !== path));
           renderChips();
-          input.focus();
+          focusAfterChange();
         });
       }
       const summary = folders.length ? `${folders.length} folder exclusion${folders.length === 1 ? '' : 's'} active.` : 'No folders excluded.';
@@ -81,7 +92,7 @@ export class FolderPicker extends Component {
       if (!this.rules().folders.includes(path)) this.onChange([...this.rules().folders, path]);
       input.value = '';
       renderChips();
-      input.focus();
+      focusAfterChange();
     };
 
     const suggest = new FolderSuggest(this.app, input, () => this.rules().folders, choose);

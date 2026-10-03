@@ -13,7 +13,9 @@
 3. In **Excluded folders**, start typing a folder name and select it from the suggestions. It appears as a chip.
 4. Confirm that **Connection status** says the guard is connected before starting an import.
 
-Click a chip to remove its exclusion. To exclude a folder that does not exist yet, enter its full path relative to the vault and click **Add folder**.
+Click or tap a chip to remove its exclusion. To exclude a folder that does not exist yet, enter its full path relative to the vault and select **Add folder**.
+
+On mobile, the chips stay below the input and the keyboard is dismissed after adding a folder. Removing a chip does not reopen the keyboard. Paste image rename must also be enabled on that device.
 
 **No folders are excluded by default.** Changes apply immediately and are saved automatically. Removing all chips clears all exclusions.
 
@@ -56,7 +58,7 @@ Disable the old helper, replace only `main.js` and `manifest.json`, add `styles.
 
 ## Privacy
 
-Folder Guard makes no network requests, sends no telemetry, requires no account or payment, and reads no files outside the vault. It saves only your exclusion settings and does not change Paste image rename's settings.
+Folder Guard makes no network requests, sends no telemetry, requires no account or payment, and reads no files outside the vault. The optional Buy me a coffee, Ko-fi, and Telegram links in settings open external pages only when clicked. The plugin saves only your exclusion settings and does not change Paste image rename's settings.
 
 ## License and credits
 

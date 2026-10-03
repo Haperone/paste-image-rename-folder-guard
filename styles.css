@@ -4,6 +4,7 @@
 
 .pir-folder-guard.pir-folder-guard-folders .setting-item-control {
   margin-top: var(--size-4-3);
+  min-width: 0;
 }
 
 .pir-folder-guard .pir-folder-guard-picker {
@@ -40,14 +41,26 @@
   text-align: start;
 }
 
-.pir-folder-guard button.pir-folder-guard-chip:hover {
+.pir-folder-guard button.pir-folder-guard-chip:active {
   background: transparent;
   border-color: var(--text-error);
   color: var(--text-error);
 }
 
-.pir-folder-guard button.pir-folder-guard-chip:hover .pir-folder-guard-chip-icon {
+.pir-folder-guard button.pir-folder-guard-chip:active .pir-folder-guard-chip-icon {
   color: inherit;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pir-folder-guard button.pir-folder-guard-chip:hover {
+    background: transparent;
+    border-color: var(--text-error);
+    color: var(--text-error);
+  }
+
+  .pir-folder-guard button.pir-folder-guard-chip:hover .pir-folder-guard-chip-icon {
+    color: inherit;
+  }
 }
 
 .pir-folder-guard .pir-folder-guard-chip-label {
@@ -90,4 +103,133 @@
   color: var(--text-muted);
   font-size: var(--font-ui-small);
   overflow-wrap: anywhere;
+}
+
+.pir-folder-guard-folder-suggestion {
+  display: flex;
+  align-items: center;
+  min-height: 44px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.is-mobile .pir-folder-guard :is(input, button),
+.is-mobile .pir-folder-guard-folder-suggestion {
+  min-height: 48px;
+  min-width: 48px;
+}
+
+.is-mobile .pir-folder-guard .pir-folder-guard-entry input {
+  font-size: max(16px, var(--font-ui-medium));
+}
+
+.setting-item.pir-folder-guard-support-setting {
+  display: block;
+  width: 100%;
+  padding-block: 0 var(--size-4-1);
+  border: 0;
+}
+
+.pir-folder-guard-support-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--size-4-2);
+  width: 100%;
+}
+
+.pir-folder-guard-support-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  box-sizing: border-box;
+  width: 166px;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: var(--radius-m);
+  font-size: var(--font-ui-small);
+  font-weight: var(--font-medium);
+  text-decoration: none;
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.pir-folder-guard-support-link--coffee,
+.pir-folder-guard-support-link--coffee:hover {
+  background: #ffdd00;
+  color: #000;
+}
+
+.pir-folder-guard-support-link--kofi,
+.pir-folder-guard-support-link--kofi:hover {
+  background: #72a4f2;
+  color: #000;
+}
+
+.pir-folder-guard-support-link--telegram,
+.pir-folder-guard-support-link--telegram:hover {
+  background: #007db8;
+  color: #fff;
+}
+
+.pir-folder-guard-support-link .svg-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.pir-folder-guard-support-link:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pir-folder-guard-support-link:hover {
+    filter: brightness(1.04);
+    transform: translateY(-1px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pir-folder-guard-support-link { transition: none; }
+}
+
+@media (pointer: coarse) {
+  .pir-folder-guard-support-link { min-height: 44px; }
+}
+
+.is-mobile .setting-item.pir-folder-guard-support-setting {
+  padding: 0 0 var(--size-4-2);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.is-mobile .pir-folder-guard-support-links {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  align-items: center;
+}
+
+.is-mobile .pir-folder-guard-support-link {
+  width: min(100%, 220px);
+  min-height: 44px;
+  padding-inline: 6px;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .pir-folder-guard .pir-folder-guard-entry {
+    flex-direction: column;
+  }
+
+  .pir-folder-guard .pir-folder-guard-entry input {
+    flex: 0 1 auto;
+  }
+
+  .pir-folder-guard .pir-folder-guard-entry button {
+    width: 100%;
+  }
 }

@@ -4,7 +4,13 @@
 
 Run `npm run check` with Node.js 22.13+.
 
-Local result on 2026-09-20 (Windows): **26/26 tests passed**. `npm run package` passed ESLint with zero warnings, TypeScript, the production build and release-file validation. A separate browser harness using the actual picker/CSS and mocked Obsidian APIs passed add/remove/cleanup checks and layout checks at 760 px and 320 px; both screenshots were inspected.
+Local result for 1.0.3 on 2026-10-03 (Windows): **28/28 tests passed**. ESLint passed with zero warnings; TypeScript, the production build and release-file validation passed. The runtime bundle imports only Obsidian, with no Node.js or Electron dependency.
+
+A Chromium browser harness using the actual picker/CSS and mocked Obsidian APIs passed touch, focus, long-path wrapping and cleanup checks in light and dark themes at 320×700, 375×812, 430×932, 768×1024, 844×390 and 375×330. It verified 48 px mobile targets, input text of at least 16 px, no horizontal overflow, chips below the input and no hover highlight on a touch-only device. Representative phone screenshots were inspected. Desktop layout and hover checks also passed at 760 px and 320 px.
+
+These browser contexts emulate touch and viewport dimensions. They do not run iOS WebKit, a real software keyboard, or Obsidian's native suggestion popup. Tests verify that mobile edits blur the input and focus a button without scrolling; actual keyboard dismissal remains a real-device check.
+
+A separate browser check of the support header passed in light and dark themes at 760 px desktop and 320 px mobile widths. It verified the three link labels and destinations, safe external-link attributes, no duplicate links after rerendering, keyboard focus order and indicators, desktop row/mobile column layout, mobile targets of at least 44 px, and no horizontal overflow.
 
 The folder picker adds regression coverage for live folder suggestions, duplicate prevention, removable chips, legacy exclusions, names containing commas and semicolons, saved array snapshots, empty selections after restart, and cleanup on settings rerenders, tab hiding and plugin unloading. The UI tests use an API/DOM test double; Obsidian's native popup and keyboard handling still need the real-device checks below.
 
@@ -36,5 +42,9 @@ Status: **not yet performed**. Use a disposable vault, both plugins, and a few d
 - [ ] Check visible keyboard focus and accessible names on the input, add button and remove chips. Close settings with suggestions open; confirm the popup disappears. Repeat through settings search on Obsidian 1.13+.
 - [ ] Check settings in light and dark themes, a narrow window and a popout. Close the popout and confirm detection still works in the main window.
 - [ ] Repeat the main file-operation cases on Android and iOS. Check readable text, comfortable touch interaction and no horizontal overflow.
+- [ ] On Android and iOS, select a folder from suggestions and add a future folder manually. Confirm the keyboard closes after adding, and removing a chip does not reopen it or scroll the settings unexpectedly.
+- [ ] Confirm paths are not autocorrected or automatically capitalized. Test long paths, an empty list, portrait/landscape orientation and a visible keyboard. Check that scrolling does not accidentally remove chips.
+- [ ] With VoiceOver/TalkBack or an external keyboard, confirm focus remains reachable after adding/removing a chip and the exclusion count is announced.
+- [ ] Check the three support buttons with mouse, keyboard, and touch. Confirm each opens its intended external page and the header fits in desktop and mobile settings.
 
 Do not mark these boxes from automated test results. Attach observations from actual app sessions before the public release.

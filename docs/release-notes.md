@@ -1,8 +1,11 @@
-# 1.0.2
+# 1.0.3
 
-Folder exclusion chips now appear below the input, with clearer hover feedback.
+Folder exclusions are easier to edit on mobile, and settings now include optional support links.
 
-- Show selected folder chips below the input row.
-- Highlight a chip's border, text and remove icon in red on hover, matching Local Image Compress.
+- Improve the layout on narrow screens, enlarge touch targets, and wrap long folder paths.
+- Move focus away from the text input after adding or removing an exclusion on mobile, while preserving input focus on desktop.
+- Disable automatic capitalization and correction when entering folder paths.
+- Add Buy me a coffee, Ko-fi, and Support buttons at the top of settings, with keyboard focus indicators and a vertical layout on mobile.
+- Keep the exclusion list empty by default and show selected folders as chips below the input.
 
 Requires Paste image rename to be installed and enabled separately. Manual batch renaming is unaffected. Wait for the connected status after enabling or reloading the dependency before importing attachments.

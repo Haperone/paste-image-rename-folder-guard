@@ -26,6 +26,7 @@ export class PluginSettingTab {
 
 export class App {}
 export class Setting {}
+export const Platform = { isMobile: false };
 
 export class Component {
   cleanups = [];

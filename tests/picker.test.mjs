@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { AbstractInputSuggest, FolderGuardPlugin, FolderPicker, parseFolders } from '../.test-build/subject.mjs';
+import { AbstractInputSuggest, FolderGuardPlugin, FolderPicker, Platform, parseFolders } from '../.test-build/subject.mjs';
 
 // Only model the DOM operations the picker owns. Obsidian's popup/keyboard engine
 // is not simulated; its real-device checks are recorded separately.
@@ -25,7 +25,8 @@ class Element extends EventTarget {
   empty() { this.children = []; }
   setText(text) { this.textContent = text; }
   remove() { if (this.parent) this.parent.children = this.parent.children.filter(child => child !== this); }
-  focus() { this.focused = true; }
+  focus(options) { this.focused = true; this.focusOptions = options; }
+  blur() { this.focused = false; }
   click() { this.dispatchEvent(new Event('click')); }
   all(predicate) { return this.children.flatMap(child => [...(predicate(child) ? [child] : []), ...child.all(predicate)]); }
 }
@@ -72,6 +73,43 @@ test('typing filters live vault folders and selecting creates a chip without dup
   assert.equal(ui.saved.length, 1);
   ui.folders.push('New folder');
   assert.deepEqual(ui.suggest.getSuggestions('new'), ['New folder']);
+  ui.picker.unload();
+});
+
+test('mobile selection and removal keep focus reachable without reopening the text input', () => {
+  Platform.isMobile = true;
+  const ui = fixture();
+  try {
+    ui.input.focus();
+    ui.suggest.selectSuggestion('Telegram');
+    assert.deepEqual(ui.rules().folders, ['Telegram']);
+    assert.equal(ui.input.focused, false);
+    assert.equal(ui.add.focused, true);
+    assert.deepEqual(ui.add.focusOptions, { preventScroll: true });
+    assert.equal(ui.suggest.closed, true);
+
+    ui.input.focus();
+    ui.input.value = 'Future/Images';
+    ui.add.click();
+    assert.deepEqual(ui.saved.at(-1), ['Telegram', 'Future/Images']);
+    assert.equal(ui.input.focused, false);
+
+    ui.chips()[0].click();
+    ui.chips()[0].click();
+    assert.deepEqual(ui.saved.at(-1), []);
+    assert.equal(ui.input.focused, false);
+    assert.equal(ui.add.focused, true);
+  } finally {
+    ui.picker.unload();
+    Platform.isMobile = false;
+  }
+});
+
+test('desktop editing preserves text focus for adding several folders', () => {
+  const ui = fixture();
+  ui.suggest.selectSuggestion('Telegram');
+  assert.equal(ui.input.focused, true);
+  assert.deepEqual(ui.input.focusOptions, { preventScroll: true });
   ui.picker.unload();
 });
 
@@ -132,17 +170,19 @@ test('settings search rerenders, tab hiding and plugin unloading dispose the rig
   const plugin = new FolderGuardPlugin(app);
   await plugin.onload();
   const tab = plugin.tabs[0];
+  const folders = tab.getSettingDefinitions().find(definition => definition.name === 'Excluded folders');
+  assert.ok(folders);
   const first = makeSetting();
-  const releaseFirst = tab.getSettingDefinitions()[0].render(first);
+  const releaseFirst = folders.render(first);
   const second = makeSetting();
-  tab.getSettingDefinitions()[0].render(second);
+  folders.render(second);
   assert.equal(first.controlEl.children.length, 0);
   releaseFirst();
   assert.equal(second.controlEl.children.length, 1);
   tab.hide();
   assert.equal(second.controlEl.children.length, 0);
   const third = makeSetting();
-  tab.getSettingDefinitions()[0].render(third);
+  folders.render(third);
   plugin.unload();
   assert.equal(third.controlEl.children.length, 0);
 });

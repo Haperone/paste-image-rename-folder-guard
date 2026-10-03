@@ -1,6 +1,6 @@
 {
   "name": "paste-image-rename-folder-guard",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Exclude vault folders from automatic attachment renaming by Paste image rename.",
   "private": true,
   "license": "MIT",

@@ -1,4 +1,4 @@
-import { App, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Notice, Plugin, PluginSettingTab, setIcon, Setting } from 'obsidian';
 import { isExcluded, parseFolders, type FolderRules } from './folders';
 import { FolderPicker } from './folder-picker';
 import { findTarget, RenameGuard, type GuardStatus } from './integration';
@@ -84,9 +84,10 @@ class FolderGuardSettingTab extends PluginSettingTab {
   // use the older public Setting API, also used by display() on earlier versions.
   override getSettingDefinitions() {
     return [
+      { name: 'Support links', searchable: false, render: (setting: Setting) => this.renderSupportLinks(setting) },
       {
         name: 'Excluded folders',
-        desc: 'Choose folders where Paste image rename must skip automatic renaming and rename prompts. Subfolders are included. Click a chip to remove an exclusion.',
+        desc: 'Choose folders where Paste image rename must skip automatic renaming and rename prompts. Subfolders are included. Click or tap a chip to remove an exclusion.',
         render: (setting: Setting) => this.renderFolders(setting)
       },
       { name: 'Connection status', render: (setting: Setting) => this.renderStatus(setting) },
@@ -95,6 +96,26 @@ class FolderGuardSettingTab extends PluginSettingTab {
         desc: 'Exclusions use the attachment folder, not the note folder. Existing files and manual batch rename commands are unchanged. After enabling or reloading the dependency, allow up to one second for the connection.'
       }
     ];
+  }
+
+  private renderSupportLinks(setting: Setting): void {
+    setting.settingEl.empty();
+    setting.settingEl.addClass('pir-folder-guard-support-setting');
+    const links = setting.settingEl.createDiv({
+      cls: 'pir-folder-guard-support-links', attr: { role: 'group', 'aria-label': 'Support links' }
+    });
+    const addLink = (href: string, icon: string, label: string, variant: string) => {
+      const link = links.createEl('a', {
+        cls: `pir-folder-guard-support-link ${variant}`,
+        href,
+        attr: { target: '_blank', rel: 'noopener noreferrer' }
+      });
+      setIcon(link.createSpan({ attr: { 'aria-hidden': 'true' } }), icon);
+      link.createSpan({ text: label });
+    };
+    addLink('https://buymeacoffee.com/haperone', 'coffee', 'Buy me a coffee', 'pir-folder-guard-support-link--coffee');
+    addLink('https://ko-fi.com/haperone', 'heart', 'Ko-fi', 'pir-folder-guard-support-link--kofi');
+    addLink('https://t.me/supp_fold_guard_bot', 'send', 'Support', 'pir-folder-guard-support-link--telegram');
   }
 
   // Compatibility fallback: Obsidian 1.13+ renders the definitions instead.

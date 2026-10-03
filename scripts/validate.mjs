@@ -22,6 +22,8 @@ for (const path of ['main.js', 'styles.css', 'README.md', 'LICENSE']) assert((aw
 const bundle = await readFile('main.js', 'utf8');
 const imports = [...bundle.matchAll(/require\(["']([^"']+)["']\)/g)].map(match => match[1]);
 assert.deepEqual([...new Set(imports)], ['obsidian'], 'The runtime bundle must depend only on Obsidian.');
-assert(!/eval\(|\bfetch\(|\bXMLHttpRequest\b|\bhttps?:\/\//.test(bundle), 'No dynamic execution or network code in the runtime.');
+const supportLinks = ['https://buymeacoffee.com/haperone', 'https://ko-fi.com/haperone', 'https://t.me/supp_fold_guard_bot'];
+const bundleWithoutSupportLinks = supportLinks.reduce((source, url) => source.replaceAll(url, ''), bundle);
+assert(!/eval\(|\bfetch\(|\bXMLHttpRequest\b|\bhttps?:\/\//.test(bundleWithoutSupportLinks), 'No dynamic execution or network code in the runtime.');
 assert((await readFile('LICENSE', 'utf8')).includes(`Copyright (c) 2026 ${manifest.author}`));
 console.log(`Validated ${manifest.id} ${manifest.version}: metadata, assets, license and runtime imports.`);
